@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -34,6 +36,16 @@ class User
      * @ORM\Column(type="string", length=255)
      */
     private $Email;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Fiche::class, mappedBy="helper")
+     */
+    private $fiches;
+
+    public function __construct()
+    {
+        $this->fiches = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -72,6 +84,36 @@ class User
     public function setEmail(string $Email): self
     {
         $this->Email = $Email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Fiche>
+     */
+    public function getFiches(): Collection
+    {
+        return $this->fiches;
+    }
+
+    public function addFich(Fiche $fich): self
+    {
+        if (!$this->fiches->contains($fich)) {
+            $this->fiches[] = $fich;
+            $fich->setHelper($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFich(Fiche $fich): self
+    {
+        if ($this->fiches->removeElement($fich)) {
+            // set the owning side to null (unless already changed)
+            if ($fich->getHelper() === $this) {
+                $fich->setHelper(null);
+            }
+        }
 
         return $this;
     }

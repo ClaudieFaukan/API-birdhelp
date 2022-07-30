@@ -27,7 +27,7 @@ class Animal
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $Color;
+    private $color;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -53,12 +53,12 @@ class Animal
 
     public function getColor(): ?string
     {
-        return $this->Color;
+        return $this->color;
     }
 
-    public function setColor(string $Color): self
+    public function setColor(string $color): self
     {
-        $this->Color = $Color;
+        $this->Color = $color;
 
         return $this;
     }

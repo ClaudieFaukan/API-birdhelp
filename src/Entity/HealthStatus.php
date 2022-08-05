@@ -3,16 +3,16 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\CategoryRepository;
+use App\Repository\HealthStatusRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ApiResource()
- * @ORM\Entity(repositoryClass=CategoryRepository::class)
+ * @ORM\Entity(repositoryClass=HealthStatusRepository::class)
  */
-class Category
+class HealthStatus
 {
     /**
      * @ORM\Id
@@ -24,10 +24,10 @@ class Category
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    private $status;
 
     /**
-     * @ORM\OneToMany(targetEntity=Fiche::class, mappedBy="category")
+     * @ORM\OneToMany(targetEntity=Fiche::class, mappedBy="healthstatus")
      */
     private $fiches;
 
@@ -41,14 +41,14 @@ class Category
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getStatus(): ?string
     {
-        return $this->name;
+        return $this->status;
     }
 
-    public function setName(string $name): self
+    public function setStatus(string $status): self
     {
-        $this->name = $name;
+        $this->status = $status;
 
         return $this;
     }
@@ -65,7 +65,7 @@ class Category
     {
         if (!$this->fiches->contains($fich)) {
             $this->fiches[] = $fich;
-            $fich->setCategory($this);
+            $fich->setHealthstatus($this);
         }
 
         return $this;
@@ -75,8 +75,8 @@ class Category
     {
         if ($this->fiches->removeElement($fich)) {
             // set the owning side to null (unless already changed)
-            if ($fich->getCategory() === $this) {
-                $fich->setCategory(null);
+            if ($fich->getHealthstatus() === $this) {
+                $fich->setHealthstatus(null);
             }
         }
 

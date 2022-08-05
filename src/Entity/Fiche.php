@@ -36,6 +36,31 @@ class Fiche
      */
     private $geographicCoordinate;
 
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $date;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $photo;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=HealthStatus::class, inversedBy="fiches")
+     */
+    private $healthstatus;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $description;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="fiches")
+     */
+    private $category;
+
     public function __construct()
     {
         $this->geographicCoordinate = new ArrayCollection();
@@ -96,6 +121,66 @@ class Fiche
                 $geographicCoordinate->setFiche(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): self
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): self
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
+    public function getHealthstatus(): ?HealthStatus
+    {
+        return $this->healthstatus;
+    }
+
+    public function setHealthstatus(?HealthStatus $healthstatus): self
+    {
+        $this->healthstatus = $healthstatus;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
 
         return $this;
     }

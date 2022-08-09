@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,18 +18,10 @@ class CategorieController extends AbstractController
     {
         $this->categories = $categoryRepository;
     }
-    /**
-     * @Route("/categorie", name="app_categorie")
-     */
-    public function index(): Response
-    {
-        return $this->render('categorie/index.html.twig', [
-            'controller_name' => 'CategorieController',
-        ]);
-    }
 
     /**
-     *@Route("/categories", name="get_all_categories")
+     *@Route("/categories", name="get_all_categories", methods="GET") 
+     *
      */
     public function getCategories()
     {
@@ -40,5 +33,12 @@ class CategorieController extends AbstractController
         }
 
         return new JsonResponse($categories);
+    }
+
+    /**
+     * @Route("/categorie", name="post_categorie")
+     */
+    public function postCategorie(Request $request)
+    {
     }
 }

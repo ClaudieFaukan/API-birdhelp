@@ -29,10 +29,7 @@ class Animal
      */
     private $color;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $breed;
+
 
     public function getId(): ?int
     {
@@ -59,18 +56,6 @@ class Animal
     public function setColor(string $color): self
     {
         $this->Color = $color;
-
-        return $this;
-    }
-
-    public function getBreed(): ?string
-    {
-        return $this->breed;
-    }
-
-    public function setBreed(string $breed): self
-    {
-        $this->breed = $breed;
 
         return $this;
     }

@@ -2,15 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Animal;
 use DateTime;
+use Exception;
 use App\Entity\User;
 use App\Entity\Fiche;
+use App\Entity\Animal;
 use App\Repository\FicheRepository;
 use App\Entity\GeographicCoordinate;
 use App\Repository\CategoryRepository;
-use App\Repository\HealthStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\HealthStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -54,39 +55,44 @@ class FicheController extends AbstractController
         $categoryEntity = $this->categoryRepository->find($animalP);
         $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
 
-        $user = new User;
-        $user->setEmail($helper)
-            ->setFirstName("anonyme")
-            ->setLastName("anonyme");
+        try {
 
-        $datetime = new DateTime($date);
+            $user = new User;
+            $user->setEmail($helper)
+                ->setFirstName("anonyme")
+                ->setLastName("anonyme");
+
+            $datetime = new DateTime($date);
 
 
-        $animal = new Animal;
-        $animal->setCategorie($categoryEntity)
-            ->setColor($color);
+            $animal = new Animal;
+            $animal->setCategorie($categoryEntity)
+                ->setColor($color);
 
-        $coord = new GeographicCoordinate;
-        $coord->setLattitude(strval($coordinate[0]))
-            ->setLongitude(strval($coordinate[1]));
+            $coord = new GeographicCoordinate;
+            $coord->setLattitude(strval($coordinate[0]))
+                ->setLongitude(strval($coordinate[1]));
 
-        $fiche = new Fiche;
-        $fiche->setHelper($user)
-            ->setAnimal($animal)
-            ->setDate($datetime)
-            ->setPhoto($photo)
-            ->setHealthstatus($healthStatusEntity)
-            ->setDescription($description)
-            ->setCategory($categoryEntity)
-            ->setCoordinate($coord);
+            $fiche = new Fiche;
+            $fiche->setHelper($user)
+                ->setAnimal($animal)
+                ->setDate($datetime)
+                ->setPhoto($photo)
+                ->setHealthstatus($healthStatusEntity)
+                ->setDescription($description)
+                ->setCategory($categoryEntity)
+                ->setCoordinate($coord);
 
-        $em->persist($animal);
-        $em->persist($user);
-        $em->persist($fiche);
-        $em->persist($coord);
-        $em->flush();
+            $em->persist($animal);
+            $em->persist($user);
+            $em->persist($fiche);
+            $em->persist($coord);
+            $em->flush();
 
-        //return new JsonResponse([json_encode($attribut)], Response::HTTP_OK);
-        return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
+            //return new JsonResponse([json_encode($attribut)], Response::HTTP_OK);
+            return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return new JsonResponse(["message" => "Erreur survenu", "Details" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

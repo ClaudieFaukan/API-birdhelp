@@ -27,7 +27,7 @@ class FicheController extends AbstractController
 
     public function __construct(FicheRepository $ficheRepository, CategoryRepository $categoryRepository, HealthStatusRepository $healthStatusRepository)
     {
-        $this->ficherepository = $ficheRepository;
+        $this->ficheRepository = $ficheRepository;
         $this->categoryRepository = $categoryRepository;
         $this->healthStatusRepository = $healthStatusRepository;
     }
@@ -83,7 +83,7 @@ class FicheController extends AbstractController
                 ->setCategory($categoryEntity)
                 ->setCoordinate($coord);
 
-            $em->persist($animal);
+            //$em->persist($animal);
             $em->persist($user);
             $em->persist($fiche);
             $em->persist($coord);
@@ -94,5 +94,12 @@ class FicheController extends AbstractController
         } catch (Exception $e) {
             return new JsonResponse(["message" => "Erreur survenu", "Details" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * @Route("/fiches", name="get_all_fiches")
+     */
+    public function getAllFiche()
+    {
     }
 }

@@ -22,12 +22,12 @@ class Animal
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $healthStatus;
+    private $color;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="animals")
      */
-    private $color;
+    private $categorie;
 
 
 
@@ -36,17 +36,6 @@ class Animal
         return $this->id;
     }
 
-    public function getHealthStatus(): ?string
-    {
-        return $this->healthStatus;
-    }
-
-    public function setHealthStatus(string $healthStatus): self
-    {
-        $this->healthStatus = $healthStatus;
-
-        return $this;
-    }
 
     public function getColor(): ?string
     {
@@ -56,6 +45,18 @@ class Animal
     public function setColor(string $color): self
     {
         $this->Color = $color;
+
+        return $this;
+    }
+
+    public function getCategorie(): ?Category
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Category $categorie): self
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }

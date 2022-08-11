@@ -36,6 +36,9 @@ class FicheController extends AbstractController
      */
     public function postFiche(Request $request, EntityManagerInterface $em)
     {
+        //TODO ajouter les verifs si user existe, si categorie existe, si status existe, si bien du string envoyer de description
+        //TODO Que faire des photos ?
+
         $params = json_decode($request->getContent(), true);
 
         $helper = $params["helper"];
@@ -46,33 +49,44 @@ class FicheController extends AbstractController
         $healthStatus = $params["healthstatus"];
         $description = $params["description"];
         $category = $params["category"];
+        $color = $params["color"] = !null ? $params["color"] : "non-renseigner";
 
         $categoryEntity = $this->categoryRepository->find($animalP);
-        $fiche = new Fiche;
-        $coord = new GeographicCoordinate;
-        $user = new User;
         $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
-        $user->setEmail($helper);
+
+        $user = new User;
+        $user->setEmail($helper)
+            ->setFirstName("anonyme")
+            ->setLastName("anonyme");
+
         $datetime = new DateTime($date);
+
+
         $animal = new Animal;
-        $animal->setCategorie($categoryEntity);
+        $animal->setCategorie($categoryEntity)
+            ->setColor($color);
 
-        //$coord->setLattitude($coord[1])
-        //    ->setLongitude($coord[0]);
+        $coord = new GeographicCoordinate;
+        $coord->setLattitude(strval($coordinate[0]))
+            ->setLongitude(strval($coordinate[1]));
 
+        $fiche = new Fiche;
         $fiche->setHelper($user)
             ->setAnimal($animal)
             ->setDate($datetime)
             ->setPhoto($photo)
             ->setHealthstatus($healthStatusEntity)
-            ->setDescription($description);
-        $em->persist($user);
+            ->setDescription($description)
+            ->setCategory($categoryEntity)
+            ->setCoordinate($coord);
+
         $em->persist($animal);
+        $em->persist($user);
         $em->persist($fiche);
-        //$em->persist($coord);
+        $em->persist($coord);
         $em->flush();
 
         //return new JsonResponse([json_encode($attribut)], Response::HTTP_OK);
-        return new JsonResponse($params, Response::HTTP_CREATED);
+        return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
     }
 }

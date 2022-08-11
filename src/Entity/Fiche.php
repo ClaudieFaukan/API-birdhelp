@@ -61,6 +61,11 @@ class Fiche
      */
     private $category;
 
+    /**
+     * @ORM\OneToOne(targetEntity=GeographicCoordinate::class, cascade={"persist", "remove"})
+     */
+    private $coordinate;
+
     public function __construct()
     {
         $this->geographicCoordinate = new ArrayCollection();
@@ -181,6 +186,18 @@ class Fiche
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getCoordinate(): ?GeographicCoordinate
+    {
+        return $this->coordinate;
+    }
+
+    public function setCoordinate(?GeographicCoordinate $coordinate): self
+    {
+        $this->coordinate = $coordinate;
 
         return $this;
     }

@@ -27,8 +27,7 @@ class CoordinateController extends AbstractController
         foreach ($coordinates as $key => $value) {
             /** @var GeographicCoordinate */
             $value;
-
-            $json[] = ["id" => $value->getId(), "latitude" => $value->getLattitude(), "longitude" => $value->getLongitude()];
+            $json[] = ["id" => $value->getId(), "latitude" => floatval($value->getLattitude()), "longitude" => floatval($value->getLongitude())];
         }
         return new JsonResponse($json, Response::HTTP_OK);
     }

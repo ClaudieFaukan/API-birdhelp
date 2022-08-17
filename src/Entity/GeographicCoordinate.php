@@ -34,6 +34,10 @@ class GeographicCoordinate
      */
     private $fiche;
 
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
     public function getId(): ?int
     {
         return $this->id;
@@ -73,5 +77,9 @@ class GeographicCoordinate
         $this->fiche = $fiche;
 
         return $this;
+    }
+    public function __toString()
+    {
+        return strval($this->id);
     }
 }

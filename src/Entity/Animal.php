@@ -44,7 +44,7 @@ class Animal
 
     public function setColor(string $color): self
     {
-        $this->Color = $color;
+        $this->color = $color;
 
         return $this;
     }

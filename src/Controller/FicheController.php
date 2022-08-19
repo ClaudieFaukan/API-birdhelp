@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Services\FicheToJsonFormat;
 
 
 class FicheController extends AbstractController
@@ -28,14 +29,22 @@ class FicheController extends AbstractController
     protected $healthStatusRepository;
     protected $em;
     protected $geographicCoordinateRepository;
+    protected $ficheToJsonFormat;
 
-    public function __construct(FicheRepository $ficheRepository, CategoryRepository $categoryRepository, HealthStatusRepository $healthStatusRepository, EntityManagerInterface $em, GeographicCoordinateRepository $geographicCoordinateRepository)
-    {
+    public function __construct(
+        FicheRepository $ficheRepository,
+        CategoryRepository $categoryRepository,
+        HealthStatusRepository $healthStatusRepository,
+        EntityManagerInterface $em,
+        GeographicCoordinateRepository $geographicCoordinateRepository,
+        FicheToJsonFormat $ficheToJsonFormat
+    ) {
         $this->ficheRepository = $ficheRepository;
         $this->categoryRepository = $categoryRepository;
         $this->healthStatusRepository = $healthStatusRepository;
         $this->em = $em;
         $this->geographicCoordinateRepository = $geographicCoordinateRepository;
+        $this->ficheToJsonFormat = $ficheToJsonFormat;
     }
 
     /**
@@ -48,58 +57,14 @@ class FicheController extends AbstractController
 
         $params = json_decode($request->getContent(), true);
 
-        $helper = $params["helper"];
-        $animalP = $params["Animal"];
-        $coordinate = $params["geographicCoordinate"];
-        $date = $params["date"];
-        $photo = $params["photo"];
-        $healthStatus = $params["healthstatus"];
-        $description = $params["description"];
-        $category = $params["category"];
-        $color = $params["color"] = !null ? $params["color"] : "non-renseigner";
-
-        $categoryEntity = $this->categoryRepository->find($animalP);
-        $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
-
         try {
 
-            $user = new User;
-            $user->setEmail($helper)
-                ->setFirstName("anonyme")
-                ->setLastName("anonyme");
-
-            $datetime = new DateTime($date);
-
-
-            $animal = new Animal;
-            $animal->setCategorie($categoryEntity)
-                ->setColor($color);
-
-            $coord = new GeographicCoordinate;
-            $coord->setLattitude(strval($coordinate[1]))
-                ->setLongitude(strval($coordinate[0]));
-
-            $fiche = new Fiche;
-            $fiche->setHelper($user)
-                ->setAnimal($animal)
-                ->setDate($datetime)
-                ->setPhoto($photo)
-                ->setHealthstatus($healthStatusEntity)
-                ->setDescription($description)
-                ->setCategory($categoryEntity)
-                ->setCoordinate($coord);
-
-            $coord->setFiche($fiche);
-
-            //$em->persist($animal);
-            $em->persist($user);
-            $em->persist($fiche);
-            $em->persist($coord);
-            $em->flush();
-
-
+            $callback =  $this->ficheToJsonFormat->jsonToFiche($params, $em);
+            if ($callback == true) {
+                return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
+            }
             //return new JsonResponse([json_encode($attribut)], Response::HTTP_OK);
-            return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
+            return new JsonResponse(["message" => "Erreur survenu", "Details" => "gg"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (Exception $e) {
             return new JsonResponse(["message" => "Erreur survenu", "Details" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -109,22 +74,14 @@ class FicheController extends AbstractController
      */
     public function getFicheById($id)
     {
+        $json = [];
         try {
 
             $fiche = $this->ficheRepository->find($id);
-            $json = [];
-            $json["id"] = $fiche->getId();
-            $json["helper"] = ["id" => $fiche->getHelper()->getId(), "firstName" => $fiche->getHelper()->getFirstName(), "lastName" => $fiche->getHelper()->getLastName(), "contact" => $fiche->getHelper()->getEmail()];
-            $json["animal"] = ["id" => $fiche->getAnimal()->getId(), "color" => $fiche->getAnimal()->getColor(), "category" => $fiche->getAnimal()->getCategorie()];
-            $json["healthStatus"] = $fiche->getHealthstatus()->getStatus();
-            $json["category"] = $fiche->getCategory()->getName();
-            $json["date"] = $fiche->getDate();
-            $json["photo"] = $fiche->getPhoto();
-            $json["description"] = $fiche->getDescription();
-            $json["coordinates"] = ["lat" => $fiche->getCoordinate()->getLattitude(), "long" => $fiche->getCoordinate()->getLongitude()];
-            $ficheJson = json_encode($json);
 
-            return new JsonResponse($ficheJson, Response::HTTP_OK);
+            $json = $this->ficheToJsonFormat->format($fiche);
+
+            return new JsonResponse($json, Response::HTTP_OK);
         } catch (Exception $e) {
             return new JsonResponse(["message" => "erreur survenue, verifier l'id"], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -136,30 +93,42 @@ class FicheController extends AbstractController
      */
     public function getFicheByIdCoordinate($id)
     {
+        $json = [];
+
         try {
+
             $coord = $this->geographicCoordinateRepository->find($id);
+
             $fiche = $this->ficheRepository->find($coord->getFiche()->getId());
 
-            $json = [];
-            $json["id"] = $fiche->getId();
-            $json["helper"] = ["id" => $fiche->getHelper()->getId(), "firstName" => $fiche->getHelper()->getFirstName(), "lastName" => $fiche->getHelper()->getLastName(), "contact" => $fiche->getHelper()->getEmail()];
-            $json["animal"] = ["id" => $fiche->getAnimal()->getId(), "color" => $fiche->getAnimal()->getColor(), "category" => $fiche->getAnimal()->getCategorie()];
-            $json["healthStatus"] = $fiche->getHealthstatus()->getStatus();
-            $json["category"] = $fiche->getCategory()->getName();
-            $json["date"] = $fiche->getDate();
-            $json["photo"] = $fiche->getPhoto();
-            $json["description"] = $fiche->getDescription();
-            $json["coordinates"] = ["lat" => $fiche->getCoordinate()->getLattitude(), "long" => $fiche->getCoordinate()->getLongitude()];
+            $json = $this->ficheToJsonFormat->format($fiche);
+
             return new JsonResponse($json, Response::HTTP_OK);
         } catch (Exception $e) {
-            return new JsonResponse(["message" => "erreur survenue, verifier l'id"], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(["message" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * @Route("/fiches", name="get_all_fiches")
+     * @Route("/fiches", name="get_all_fiches",methods="GET")
      */
     public function getAllFiche()
     {
+
+        $json = [];
+
+        try {
+            $fiches = $this->ficheRepository->findAll();
+
+            foreach ($fiches as $fiche) {
+
+                $json[] = $this->ficheToJsonFormat->format($fiche);
+            }
+
+            return new JsonResponse($json, Response::HTTP_OK);
+        } catch (Exception $e) {
+
+            return new JsonResponse(["message" => $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR]);
+        }
     }
 }

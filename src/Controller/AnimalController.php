@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Animal;
+use App\Entity\Category;
 use App\Repository\AnimalRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +30,7 @@ class AnimalController extends AbstractController
         $animals = $this->repository->findAll();
         $animalsArray = [];
         foreach ($animals as $animal) {
-            $animalsArray[] = ["id" => $animal->getId(), "color" => $animal->getColor(), "healthStatus" => $animal->getHealthStatus()];
+            $animalsArray[] = ["id" => $animal->getId(), "color" => $animal->getColor()];
         }
         return new JsonResponse(json_encode($animalsArray));
     }

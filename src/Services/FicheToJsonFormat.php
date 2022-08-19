@@ -12,16 +12,20 @@ use App\Entity\GeographicCoordinate;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\HealthStatusRepository;
+use App\Repository\UserRepository;
+use Symfony\Component\Console\Helper\HelperInterface;
 
 class FicheToJsonFormat
 {
     protected $categoryRepository;
     protected $healthStatusRepository;
+    protected $helperRepository;
 
-    public function __construct(HealthStatusRepository $healthStatusRepository, CategoryRepository $categoryRepository)
+    public function __construct(HealthStatusRepository $healthStatusRepository, CategoryRepository $categoryRepository, UserRepository $helper)
     {
         $this->categoryRepository = $categoryRepository;
         $this->healthStatusRepository = $healthStatusRepository;
+        $this->helperRepository = $helper;
     }
 
     public function format(Fiche $fiche): array
@@ -68,12 +72,15 @@ class FicheToJsonFormat
 
             $categoryEntity = $this->categoryRepository->find($animalP);
             $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
-
-
-            $user = new User;
-            $user->setEmail($helper)
-                ->setFirstName("anonyme")
-                ->setLastName("anonyme");
+            $userBDD = $this->helperRepository->findOneBy(["Email" => $helper]);
+            if ($userBDD) {
+                $user = $userBDD;
+            } else {
+                $user = new User;
+                $user->setEmail($helper)
+                    ->setFirstName("anonyme")
+                    ->setLastName("anonyme");
+            }
 
             $datetime = new DateTime($date);
 

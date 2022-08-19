@@ -37,12 +37,12 @@ class FicheToJsonFormat
             ];
         $json["animal"] = [
             "id" => $fiche->getAnimal()->getId(),
-            "color" => $fiche->getAnimal()->getColor(),
+            "color" => $fiche->getAnimal()->getColor() == null ? "non-renseigner" : $fiche->getAnimal()->getColor(),
         ];
         $json["healthStatus"] = $fiche->getHealthstatus()->getStatus();
         $json["category"] = $fiche->getCategory()->getName();
         $json["date"] = $fiche->getDate()->format("Y-m-d H:i:s");
-        $json["photo"] = $fiche->getPhoto();
+        $json["photo"] = $fiche->getPhoto() == null ? "non-renseigner" : $fiche->getPhoto();
         $json["description"] = $fiche->getDescription();
         $json["coordinates"] = [
             "id" => $fiche->getCoordinate()->getId(),

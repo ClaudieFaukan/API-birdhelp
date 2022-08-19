@@ -72,14 +72,14 @@ class FicheToJsonFormat
 
             $categoryEntity = $this->categoryRepository->find($animalP);
             $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
-            $userBDD = $this->helperRepository->findOneBy(["Email" => $helper]);
+            $userBDD = $this->helperRepository->findOneBy(["Email" => $helper["Email"]]);
             if ($userBDD) {
                 $user = $userBDD;
             } else {
                 $user = new User;
-                $user->setEmail($helper)
-                    ->setFirstName("anonyme")
-                    ->setLastName("anonyme");
+                $user->setEmail($helper["Email"])
+                    ->setFirstName($helper["FirstName"])
+                    ->setLastName($helper["LastName"]);
             }
 
             $datetime = new DateTime($date);

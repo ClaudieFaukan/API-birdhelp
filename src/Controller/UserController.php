@@ -30,6 +30,9 @@ class UserController extends AbstractController
         $json = [];
         try {
             $user = $this->helperRepository->findOneBy(["Email" => $id]);
+            if ($user == null) {
+                return new JsonResponse(null, Response::HTTP_FORBIDDEN);
+            }
             $fiches = $this->ficheRepository->findBy(["helper" => $user->getId()]);
 
             foreach ($fiches as $fiche) {

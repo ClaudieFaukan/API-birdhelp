@@ -78,8 +78,8 @@ class FicheToJsonFormat
             } else {
                 $user = new User;
                 $user->setEmail($helper["Email"])
-                    ->setFirstName($helper["FirstName"])
-                    ->setLastName($helper["LastName"]);
+                    ->setFirstName($helper["FirstName"] != null ? $helper["FirstName"] : "Non renseigner")
+                    ->setLastName($helper["LastName"] != null ? $helper["LastName"] : "Non renseigner");
             }
 
             $datetime = new DateTime($date);
@@ -91,7 +91,8 @@ class FicheToJsonFormat
 
             $coord = new GeographicCoordinate;
             $coord->setLattitude(strval($coordinate[1]))
-                ->setLongitude(strval($coordinate[0]));
+                ->setLongitude(strval($coordinate[0]))
+                ->setDiffDist($coordinate[1] + $coordinate[0]);
 
             $fiche = new Fiche;
             $fiche->setHelper($user)

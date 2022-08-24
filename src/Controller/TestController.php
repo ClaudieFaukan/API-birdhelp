@@ -3,9 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Fiche;
+use Doctrine\DBAL\Query;
+use App\Entity\GeographicCoordinate;
+use App\Repository\FicheRepository;
 use Symfony\Component\HttpFoundation\Request;
+use App\Services\CalculatorDistanceGeographic;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\GeographicCoordinateRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TestController extends AbstractController
@@ -13,18 +19,40 @@ class TestController extends AbstractController
     /**
      * @Route("/test", name="app_test")
      */
-    public function index(Request $request)
+    public function index(Request $request, GeographicCoordinateRepository $repo, FicheRepository $ficheRepository)
     {
+        try{
 
-        $json = json_encode(
-            [
-                "helper" => 0, "Animal" => 5, "geographicCoordinate" => [-122.084, 37.4219983],
-                "date" => "2022-08-11:27:59.949183",
-                "photo" => null,
-                "healthstatus" => 3,
-                "description" => "il a peur il a peur\n",
-                "category" => 0
-            ]
-        );
-    }
+            $current_coord = new GeographicCoordinate;
+            $current_coord->setLattitude(49.435134993867)->setLongitude(1.0815019892211);
+            $radius_meter = 6000;
+            //$convertisseur est la référence pour 1km en dist_diff
+            $convertisseur = 0.00900171;
+    
+            $currentPosition = floatval($current_coord->getLattitude()) + floatval($current_coord->getLongitude());
+            $indice_de_recherche = ($radius_meter / 1000) * $convertisseur;
+    
+            $indiceHigh = $currentPosition + $indice_de_recherche;
+            $indiceLow = $currentPosition - $indice_de_recherche;
+    
+    
+            $query = $repo->createQueryBuilder("a")
+                ->where("a.diff_dist >= :low ")->andWhere("a.diff_dist <= :high")->setParameters([':low' => $indiceLow, ':high' => $indiceHigh]);
+    
+            $query = $query->getQuery()->execute();
+            if (!$query) {
+                return new JsonResponse($query, Response::HTTP_FORBIDDEN);
+            }
+            /** @var GeographicCoordinate[] */
+            $listCoordinate = $query;
+            $idTosearch = [];
+            foreach ($listCoordinate as $key) {
+                $idTosearch[] = $key->getFiche()->getId();
+            }
+    
+            $fiches = $ficheRepository->findBy(["id" => $idTosearch]);
+            return New JsonResponse($fiches,Response::HTTP_OK);
+        }catch(Exception $e){
+            return New JsonResponse(["Erreur"=> $e->getMessage],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 }

@@ -34,6 +34,11 @@ class GeographicCoordinate
      */
     private $fiche;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $diff_dist;
+
     public function setId($id)
     {
         $this->id = $id;
@@ -81,5 +86,17 @@ class GeographicCoordinate
     public function __toString()
     {
         return strval($this->id);
+    }
+
+    public function getDiffDist(): ?float
+    {
+        return $this->diff_dist;
+    }
+
+    public function setDiffDist(float $diff_dist): self
+    {
+        $this->diff_dist = $diff_dist;
+
+        return $this;
     }
 }

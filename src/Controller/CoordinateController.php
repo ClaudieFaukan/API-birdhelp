@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\GeographicCoordinateRepository;
+use App\Services\FicheToJsonFormat;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -16,11 +17,13 @@ class CoordinateController extends AbstractController
 {
     protected $coordinateRepository;
     protected $ficheRepository;
+    protected $ficheToJsonFormat;
 
-    public function __construct(GeographicCoordinateRepository $geographicCoordinateRepository, FicheRepository $ficheRepository)
+    public function __construct(GeographicCoordinateRepository $geographicCoordinateRepository, FicheRepository $ficheRepository, FicheToJsonFormat $ficheToJsonFormat)
     {
         $this->coordinateRepository = $geographicCoordinateRepository;
         $this->ficheRepository = $ficheRepository;
+        $this->ficheToJsonFormat = $ficheToJsonFormat;
     }
     /**
      * @Route("/coordinates", name="app_coordinate")
@@ -37,18 +40,19 @@ class CoordinateController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK);
     }
 
+    //TODO Refacto getCoordinateFormRadius, extraire le code et le mettre en service
+
     /**
      * @Route("/coordinates/by_current_position/radius", name="coordiante_around_user_by_radius_meter")
      */
     public function getCoordinateFromRadiusMeter(Request $request)
     {
         $params = json_decode($request->getContent(), true);
-
-        $coordinate = $params["geographicCoordinate"];
+        $coordinate = $params["coordinates"];
         $current_coord = new GeographicCoordinate;
-        $current_coord->setLattitude(strval($coordinate[1]))
-            ->setLongitude(strval($coordinate[0]))
-            ->setDiffDist($coordinate[1] + $coordinate[0]);
+        $current_coord->setLattitude(strval($coordinate["latitude"]))
+            ->setLongitude(strval($coordinate["longitude"]))
+            ->setDiffDist($coordinate["latitude"] + $coordinate["longitude"]);
 
         $radius_meter = $params["radius"];
 
@@ -78,7 +82,11 @@ class CoordinateController extends AbstractController
             }
 
             $fiches = $this->ficheRepository->findBy(["id" => $idTosearch]);
-            return new JsonResponse($fiches, Response::HTTP_OK);
+            $json = [];
+            foreach ($fiches as $fiche) {
+                $json[] = $this->ficheToJsonFormat->format($fiche);
+            }
+            return new JsonResponse($json, Response::HTTP_OK);
         } catch (Exception $e) {
             return new JsonResponse(["Erreur" => $e->getMessage], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

@@ -89,4 +89,21 @@ class UserController extends AbstractController
             return new JsonResponse(["Erreur" => $e->getMessage], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * @Route("/user/fiche/update/{id}", name="fiche_update_by_id", methods="POST")
+     */
+    public function updateFicheById($id, Request $request)
+    {
+
+        $params = json_decode($request->getContent(), true);
+        $params = $params[0];
+        $fiche = $this->ficheRepository->find($id);
+        if (!$fiche) {
+            return new JsonResponse(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        dump($params);
+        dump($fiche);
+        dd();
+    }
 }

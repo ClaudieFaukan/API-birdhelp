@@ -98,6 +98,7 @@ class UserController extends AbstractController
 
         $params = json_decode($request->getContent(), true);
         $params = $params[0];
+        dd($params);
         $fiche = $this->ficheRepository->find($id);
         if (!$fiche) {
             return new JsonResponse(Response::HTTP_INTERNAL_SERVER_ERROR);

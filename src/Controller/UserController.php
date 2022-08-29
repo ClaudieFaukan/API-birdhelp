@@ -7,6 +7,7 @@ use Exception;
 use App\Repository\UserRepository;
 use App\Repository\FicheRepository;
 use App\Repository\GeographicCoordinateRepository;
+use App\Services\CompareFicheToFicheRetour;
 use App\Services\FicheToJsonFormat;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,12 +22,14 @@ class UserController extends AbstractController
     protected $ficheRepository;
     protected $ficheToJsonFormat;
     protected $coordinateRepository;
-    public function __construct(UserRepository $userRepository, FicheRepository $ficheRepository, FicheToJsonFormat $ficheToJsonFormat, GeographicCoordinateRepository $coordinateRepository)
+    protected $compareFiche;
+    public function __construct(UserRepository $userRepository, FicheRepository $ficheRepository, FicheToJsonFormat $ficheToJsonFormat, GeographicCoordinateRepository $coordinateRepository, CompareFicheToFicheRetour $compareFicheToFicheRetour)
     {
         $this->helperRepository = $userRepository;
         $this->ficheRepository = $ficheRepository;
         $this->ficheToJsonFormat = $ficheToJsonFormat;
         $this->coordinateRepository = $coordinateRepository;
+        $this->compareFiche = $compareFicheToFicheRetour;
     }
     /**
      * @Route("/user/fiches/{id}", name="get_all_fiches_by_user")
@@ -88,5 +91,27 @@ class UserController extends AbstractController
         } catch (Exception $e) {
             return new JsonResponse(["Erreur" => $e->getMessage], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * @Route("/user/fiche/update/{id}", name="fiche_update_by_id", methods="POST")
+     */
+    public function updateFicheById($id, Request $request, EntityManagerInterface $em)
+    {
+
+        $params = json_decode($request->getContent(), true);
+
+        $fiche = $this->ficheRepository->find($id);
+        if (!$fiche) {
+            return new JsonResponse(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $isUpdate = $this->compareFiche->compareFicheEntityToFicheRetourJson($params, $em);
+
+        if (!$isUpdate) {
+            return new JsonResponse($isUpdate, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

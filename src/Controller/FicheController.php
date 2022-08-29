@@ -7,19 +7,20 @@ use Exception;
 use App\Entity\User;
 use App\Entity\Fiche;
 use App\Entity\Animal;
+use Psr\Log\LoggerInterface;
 use App\Repository\FicheRepository;
+use App\Services\FicheToJsonFormat;
 use App\Entity\GeographicCoordinate;
 use App\Repository\CategoryRepository;
-use App\Repository\GeographicCoordinateRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\HealthStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Json;
+use App\Repository\GeographicCoordinateRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Services\FicheToJsonFormat;
 
 
 class FicheController extends AbstractController
@@ -50,7 +51,7 @@ class FicheController extends AbstractController
     /**
      * @Route("/fiche", name="post_new_fiche", methods="POST")
      */
-    public function postFiche(Request $request, EntityManagerInterface $em)
+    public function postFiche(Request $request, EntityManagerInterface $em, LoggerInterface $logger)
     {
         //TODO ajouter les verifs si user existe, si categorie existe, si status existe, si bien du string envoyer de description
         //TODO Que faire des photos ?
@@ -61,11 +62,14 @@ class FicheController extends AbstractController
 
             $callback =  $this->ficheToJsonFormat->jsonToFiche($params, $em);
             if ($callback == true) {
+                $logger->info("fiche créer");
                 return new JsonResponse(["message" => "Fiche ajouter"], Response::HTTP_CREATED);
             }
             //return new JsonResponse([json_encode($attribut)], Response::HTTP_OK);
+
             return new JsonResponse(["message" => "Erreur survenu", "Details" => "gg"], Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (Exception $e) {
+            $logger->alert($e->getMessage());
             return new JsonResponse(["message" => "Erreur survenu", "Details" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -69,7 +69,7 @@
             "assets:install": "symfony-cmd"
         },
         "database-setup": [
-            "php bin/console doctrine:migrations:migrate --no-interaction"
+            "php bin/console doctrine:datafixtures:load --no-interaction"
         ],
         "post-install-cmd": [
             "@auto-scripts",

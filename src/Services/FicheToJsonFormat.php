@@ -8,11 +8,12 @@ use App\Entity\User;
 use App\Entity\Fiche;
 use App\Entity\Animal;
 use App\Entity\HealthStatus;
+use Psr\Log\LoggerInterface;
+use App\Repository\UserRepository;
 use App\Entity\GeographicCoordinate;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\HealthStatusRepository;
-use App\Repository\UserRepository;
 use Symfony\Component\Console\Helper\HelperInterface;
 
 class FicheToJsonFormat
@@ -20,12 +21,13 @@ class FicheToJsonFormat
     protected $categoryRepository;
     protected $healthStatusRepository;
     protected $helperRepository;
-
-    public function __construct(HealthStatusRepository $healthStatusRepository, CategoryRepository $categoryRepository, UserRepository $helper)
+    protected $loggerInterface;
+    public function __construct(HealthStatusRepository $healthStatusRepository, CategoryRepository $categoryRepository, UserRepository $helper, LoggerInterface $logger)
     {
         $this->categoryRepository = $categoryRepository;
         $this->healthStatusRepository = $healthStatusRepository;
         $this->helperRepository = $helper;
+        $this->loggerInterface = $logger;
     }
 
     public function format(Fiche $fiche): array
@@ -72,10 +74,8 @@ class FicheToJsonFormat
 
             $categoryEntity = $this->categoryRepository->find($animalP);
             $healthStatusEntity = $this->healthStatusRepository->find($healthStatus);
-            $userBDD = $this->helperRepository->findOneBy(["Email" => $helper["Email"]]);
-            if ($userBDD) {
-                $user = $userBDD;
-            } else {
+            $user = $this->helperRepository->findOneBy(["Email" => $helper["Email"]]);
+            if (!$user) {
                 $user = new User;
                 $user->setEmail($helper["Email"])
                     ->setFirstName($helper["FirstName"] != null ? $helper["FirstName"] : "Non renseigner")
@@ -113,6 +113,7 @@ class FicheToJsonFormat
             $em->flush();
             return true;
         } catch (Exception $e) {
+            $this->loggerInterface->error($e->getMessage());
             return $e;
         }
     }

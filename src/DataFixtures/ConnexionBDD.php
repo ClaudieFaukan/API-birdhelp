@@ -1,5 +1,10 @@
 <?php
 
+namespace App\DataFixtures;
+
+use PDO;
+use PDOException;
+
 /** Classe ConnexionBdd */
 class ConnexionBdd
 {

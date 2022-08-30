@@ -107,10 +107,10 @@ class FicheToJsonFormat
                 ->setPhoto($photo)
                 ->setHealthstatus($healthStatusEntity)
                 ->setDescription($description)
-                ->setCategory($categoryEntity);
-            //->setCoordinate($coord);
+                ->setCategory($categoryEntity)
+                ->setCoordinate($coord);
 
-            $coord->setFiche($fiche);
+            //$coord->setFiche($fiche);
             $em->persist($fiche);
 
             $em->flush();

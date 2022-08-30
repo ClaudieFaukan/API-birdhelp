@@ -107,9 +107,10 @@ class FicheToJsonFormat
             $coord->setFiche($fiche);
 
             $em->persist($animal);
+            $em->persist($coord);
             $em->persist($user);
             $em->persist($fiche);
-            $em->persist($coord);
+
             $em->flush();
             return true;
         } catch (Exception $e) {

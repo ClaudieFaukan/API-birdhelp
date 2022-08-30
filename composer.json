@@ -68,9 +68,7 @@
             "cache:clear": "symfony-cmd",
             "assets:install": "symfony-cmd"
         },
-        "database-setup": [
-            "php bin/console doctrine:fixtures:load --no-interaction"
-        ],
+        "database-setup": [],
         "post-install-cmd": [
             "@auto-scripts",
             "@database-setup"

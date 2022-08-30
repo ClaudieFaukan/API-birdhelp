@@ -80,7 +80,9 @@ class FicheToJsonFormat
                 $user->setEmail($helper["Email"])
                     ->setFirstName($helper["FirstName"] != null ? $helper["FirstName"] : "Non renseigner")
                     ->setLastName($helper["LastName"] != null ? $helper["LastName"] : "Non renseigner");
+                $em->persist($user);
             }
+
 
             $datetime = new DateTime($date);
 
@@ -88,11 +90,15 @@ class FicheToJsonFormat
             $animal = new Animal;
             $animal->setCategorie($categoryEntity)
                 ->setColor($color);
+            $em->persist($animal);
 
             $coord = new GeographicCoordinate;
             $coord->setLattitude(strval($coordinate[1]))
                 ->setLongitude(strval($coordinate[0]))
                 ->setDiffDist($coordinate[1] + $coordinate[0]);
+
+            $em->persist($coord);
+
 
             $fiche = new Fiche;
             $fiche->setHelper($user)
@@ -101,21 +107,17 @@ class FicheToJsonFormat
                 ->setPhoto($photo)
                 ->setHealthstatus($healthStatusEntity)
                 ->setDescription($description)
-                ->setCategory($categoryEntity)
-                ->setCoordinate($coord);
+                ->setCategory($categoryEntity);
+            //->setCoordinate($coord);
 
             $coord->setFiche($fiche);
-
-            $em->persist($animal);
-            $em->persist($coord);
-            $em->persist($user);
             $em->persist($fiche);
 
             $em->flush();
             return true;
         } catch (Exception $e) {
             $this->loggerInterface->error($e->getMessage());
-            return $e;
+            return false;
         }
     }
 }

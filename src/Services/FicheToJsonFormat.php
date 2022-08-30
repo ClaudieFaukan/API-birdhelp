@@ -91,6 +91,7 @@ class FicheToJsonFormat
             $animal->setCategorie($categoryEntity)
                 ->setColor($color);
             $em->persist($animal);
+            $em->flush();
 
             $coord = new GeographicCoordinate;
             $coord->setLattitude(strval($coordinate[1]))
@@ -98,7 +99,7 @@ class FicheToJsonFormat
                 ->setDiffDist($coordinate[1] + $coordinate[0]);
 
             $em->persist($coord);
-
+            $em->flush();
 
             $fiche = new Fiche;
             $fiche->setHelper($user)
@@ -110,7 +111,7 @@ class FicheToJsonFormat
                 ->setCategory($categoryEntity)
                 ->setCoordinate($coord);
 
-            //$coord->setFiche($fiche);
+            $coord->setFiche($fiche);
             $em->persist($fiche);
 
             $em->flush();

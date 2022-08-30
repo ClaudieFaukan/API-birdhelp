@@ -22,7 +22,7 @@ final class Version20220811104651 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE animal ALTER color SET NOT NULL');
         $this->addSql('ALTER TABLE fiche ADD coordinate_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE fiche DROP image');
+        //$this->addSql('ALTER TABLE fiche DROP image');
         $this->addSql('ALTER TABLE fiche ADD CONSTRAINT FK_4C13CC7898BBE953 FOREIGN KEY (coordinate_id) REFERENCES geographic_coordinate (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_4C13CC7898BBE953 ON fiche (coordinate_id)');
         $this->addSql('ALTER TABLE "user" ALTER first_name SET NOT NULL');
@@ -38,7 +38,7 @@ final class Version20220811104651 extends AbstractMigration
         $this->addSql('ALTER TABLE animal ALTER color DROP NOT NULL');
         $this->addSql('ALTER TABLE fiche DROP CONSTRAINT FK_4C13CC7898BBE953');
         $this->addSql('DROP INDEX UNIQ_4C13CC7898BBE953');
-        $this->addSql('ALTER TABLE fiche ADD image BYTEA DEFAULT NULL');
+        //$this->addSql('ALTER TABLE fiche ADD image BYTEA DEFAULT NULL');
         $this->addSql('ALTER TABLE fiche DROP coordinate_id');
     }
 }

@@ -32,7 +32,6 @@ class GeographicCoordinate
     /**
      * @ORM\OneToOne(targetEntity=Fiche::class, inversedBy="geographicCoordinate")
      * @ORM\JoinColumn(onDelete="CASCADE")
-     * @ORM\JoinColumn(onPersist="CASCADE")
      */
     private $fiche;
 

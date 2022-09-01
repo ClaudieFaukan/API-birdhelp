@@ -64,7 +64,6 @@ class Fiche
     /**
      * @ORM\OneToOne(targetEntity=GeographicCoordinate::class)
      * @ORM\JoinColumn(onDelete="CASCADE")
-     * @ORM\JoinColumn(onPersist="CASCADE")
      */
     private $coordinate;
 

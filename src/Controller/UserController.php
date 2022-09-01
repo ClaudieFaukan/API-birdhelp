@@ -87,6 +87,7 @@ class UserController extends AbstractController
 
             $fiche->removeGeographicCoordinate($coord);
             $em->remove($fiche);
+            $em->remove($coord);
             $em->flush();
 
             return new JsonResponse(Response::HTTP_OK);

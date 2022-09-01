@@ -116,4 +116,18 @@ class UserController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+    /**
+     * @Route("/user/fiche/count/{id}", name="get_count_signalement", methods="GET")
+     */
+    public function getCountFicheByUserId($id)
+    {
+        try {
+            $id = $this->helperRepository->findOneBy(["Email" => $id]);
+            $count = $this->ficheRepository->count(["helper" => $id->getId()]);
+            return new JsonResponse($count, Response::HTTP_OK);
+        } catch (Exception $e) {
+            return new JsonResponse(['erreur' => $e->getCode(), 'details' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -30,7 +30,9 @@ class GeographicCoordinate
     private $lattitude;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Fiche::class, inversedBy="geographicCoordinate")
+     * @ORM\OneToOne(targetEntity=Fiche::class, inversedBy="geographicCoordinate")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(onPersist="CASCADE")
      */
     private $fiche;
 

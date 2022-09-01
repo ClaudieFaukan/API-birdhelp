@@ -58,7 +58,7 @@ class UserController extends AbstractController
     /**
      * @Route("/user/delete/fiche/{id}", name="delete_fiche_by_id",methods="POST")
      */
-    public function deleteFicheuserById($id, Request $request)
+    public function deleteFicheuserById($id, Request $request, EntityManagerInterface $em)
     {
         try {
             //controller si id de fiche existe
@@ -84,8 +84,10 @@ class UserController extends AbstractController
             }
             $coord = $this->coordinateRepository->findOneBy(["id" => $fiche->getCoordinate()->getId()]);
             //supprimer le point geographique
-            $this->coordinateRepository->remove($coord);
-            $this->ficheRepository->remove($fiche);
+
+            $fiche->removeGeographicCoordinate($coord);
+            $em->remove($fiche);
+            $em->flush();
 
             return new JsonResponse(Response::HTTP_OK);
         } catch (Exception $e) {

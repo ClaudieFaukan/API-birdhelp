@@ -86,8 +86,12 @@ class UserController extends AbstractController
             //supprimer le point geographique
 
             $fiche->removeGeographicCoordinate($coord);
+            $animal = $fiche->getAnimal();
+
+            $em->remove($animal);
             $em->remove($fiche);
             $em->remove($coord);
+
             $em->flush();
 
             return new JsonResponse(Response::HTTP_OK);

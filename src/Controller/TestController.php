@@ -5,6 +5,7 @@ namespace App\Controller;
 use Exception;
 use App\Entity\Fiche;
 use Doctrine\DBAL\Query;
+use App\ApiAdress\ApiAdress;
 use App\Repository\FicheRepository;
 use App\Entity\GeographicCoordinate;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,49 +14,39 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\GeographicCoordinateRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TestController extends AbstractController
 {
+    protected $client;
+
+    public function __construct(HttpClientInterface $client)
+    {
+        $this->client = $client;
+    }
     /**
      * @Route("/test", name="app_test")
      */
-    public function index(Request $request, GeographicCoordinateRepository $repo, FicheRepository $ficheRepository)
+    public function index()
     {
+        $longitude = 1.0838469999398;
+        $latitude = 49.883856579769;
 
-        try {
+        $response = $this->client->request(
+            'GET',
+            "https://api-adresse.data.gouv.fr/reverse/?lon=$longitude&lat=$latitude"
+        );
+        $statusCode = $response->getStatusCode();
+        // $statusCode = 200
+        $contentType = $response->getHeaders()['content-type'][0];
+        // $contentType = 'application/json'
+        $content = $response->getContent();
 
-            $current_coord = new GeographicCoordinate;
-            $current_coord->setLattitude(49.435134993867)->setLongitude(1.0815019892211);
-            $radius_meter = 6000;
-            //$convertisseur est la référence pour 1km en dist_diff
-            $convertisseur = 0.00900171;
-
-            $currentPosition = floatval($current_coord->getLattitude()) + floatval($current_coord->getLongitude());
-            $indice_de_recherche = ($radius_meter / 1000) * $convertisseur;
-
-            $indiceHigh = $currentPosition + $indice_de_recherche;
-            $indiceLow = $currentPosition - $indice_de_recherche;
-
-
-            $query = $repo->createQueryBuilder("a")
-                ->where("a.diff_dist >= :low ")->andWhere("a.diff_dist <= :high")->setParameters([':low' => $indiceLow, ':high' => $indiceHigh]);
-
-            $query = $query->getQuery()->execute();
-            if (!$query) {
-                return new JsonResponse($query, Response::HTTP_FORBIDDEN);
-            }
-            /** @var GeographicCoordinate[] */
-            $listCoordinate = $query;
-            $idTosearch = [];
-            foreach ($listCoordinate as $key) {
-                $idTosearch[] = $key->getFiche()->getId();
-            }
-
-            $fiches = $ficheRepository->findBy(["id" => $idTosearch]);
-            return new JsonResponse($fiches, Response::HTTP_OK);
-        } catch (Exception $e) {
-            return new JsonResponse(["Erreur" => $e->getMessage], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // $content = '{"id":521583, "name":"symfony-docs", ...}'
+        /** @var ApiAdress */
+        $content = $response->toArray();
+        // $content = ['id' => 521583, 'name' => 'symfony-docs', ...]
+        dd($content->getFeatures());
     }
 }

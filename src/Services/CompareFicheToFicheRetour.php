@@ -37,42 +37,45 @@ class CompareFicheToFicheRetour
             $id = $params['id'];
             $helper = $params["helper"];
             $animalP = $params["Animal"];
-            /** @var GeographicCoordinate */
             $coordinate = $params["geographicCoordinate"];
             $date = $params["date"];
             $photo = $params["photo"];
             $healthStatus = $params["healthstatus"];
             $description = $params["description"];
             $category = $params["category"];
-            $color = $params["color"] != "" ? $params["color"] : "non-renseigner";
+            $color = $params["color"];
 
             $ficheBDD = $this->ficherepository->find($id);
             if (!$ficheBDD) {
                 return new JsonResponse(Response::HTTP_BAD_REQUEST);
             }
 
-            switch ($params) {
-                case $coordinate != [0]:
-                    $ficheBDD->getCoordinate()->setLattitude($coordinate[0])->setLongitude($coordinate[1])->setDiffDist(($coordinate[0] + $coordinate[1]));
-                    break;
-                case $animalP != 0:
-                    $ficheBDD = $this->updateAnimal($animalP, $ficheBDD);
-                    break;
-                case $healthStatus != 0:
-                    $ficheBDD = $this->updateHealthStatus($healthStatus, $ficheBDD);
-                    break;
-                case $color != "":
-                    $ficheBDD = $this->updateColor($color, $ficheBDD);
-                    break;
-                case $description != "":
-                    $ficheBDD = $this->updateDescription($description, $ficheBDD);
-                    break;
-                case $photo != null:
-                    $ficheBDD = $this->updatePhoto($photo, $ficheBDD);
-                    break;
-                default:
-                    break;
+            if ($coordinate != [0]) {
+
+                $ficheBDD->getCoordinate()->setLattitude(floatval($coordinate[1]))->setLongitude(floatval($coordinate[0]))->setDiffDist(($coordinate[0] + $coordinate[1]));
             }
+            if ($animalP != 0) {
+
+                $ficheBDD = $this->updateAnimal($animalP, $ficheBDD);
+            }
+            if ($healthStatus != 0) {
+
+                $ficheBDD = $this->updateHealthStatus($healthStatus, $ficheBDD);
+            }
+            if ($color != "") {
+
+                $ficheBDD = $this->updateColor($color, $ficheBDD);
+            }
+            if ($description != "") {
+
+                $ficheBDD = $this->updateDescription($description, $ficheBDD);
+            }
+            if ($photo != null) {
+
+                $ficheBDD = $this->updatePhoto($photo, $ficheBDD);
+            }
+
+
 
             $em->flush();
 

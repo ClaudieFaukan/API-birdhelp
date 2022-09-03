@@ -58,7 +58,7 @@ class UserController extends AbstractController
     /**
      * @Route("/user/delete/fiche/{id}", name="delete_fiche_by_id",methods="POST")
      */
-    public function deleteFicheuserById($id, Request $request)
+    public function deleteFicheuserById($id, Request $request, EntityManagerInterface $em)
     {
         try {
             //controller si id de fiche existe
@@ -84,8 +84,15 @@ class UserController extends AbstractController
             }
             $coord = $this->coordinateRepository->findOneBy(["id" => $fiche->getCoordinate()->getId()]);
             //supprimer le point geographique
-            $this->coordinateRepository->remove($coord);
-            $this->ficheRepository->remove($fiche);
+
+            $fiche->removeGeographicCoordinate($coord);
+            $animal = $fiche->getAnimal();
+
+            $em->remove($animal);
+            $em->remove($fiche);
+            $em->remove($coord);
+
+            $em->flush();
 
             return new JsonResponse(Response::HTTP_OK);
         } catch (Exception $e) {
@@ -113,5 +120,19 @@ class UserController extends AbstractController
         }
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * @Route("/user/fiche/count/{id}", name="get_count_signalement", methods="GET")
+     */
+    public function getCountFicheByUserId($id)
+    {
+        try {
+            $id = $this->helperRepository->findOneBy(["Email" => $id]);
+            $count = $this->ficheRepository->count(["helper" => $id->getId()]);
+            return new JsonResponse($count, Response::HTTP_OK);
+        } catch (Exception $e) {
+            return new JsonResponse(['erreur' => $e->getCode(), 'details' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

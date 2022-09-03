@@ -32,7 +32,7 @@ class Fiche
     private $Animal;
 
     /**
-     * @ORM\OneToMany(targetEntity=GeographicCoordinate::class, mappedBy="fiche")
+     * @ORM\OneToMany(targetEntity=GeographicCoordinate::class, mappedBy="fiche", cascade={"persist", "remove"})
      */
     private $geographicCoordinate;
 
@@ -62,7 +62,8 @@ class Fiche
     private $category;
 
     /**
-     * @ORM\OneToOne(targetEntity=GeographicCoordinate::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=GeographicCoordinate::class)
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $coordinate;
 
